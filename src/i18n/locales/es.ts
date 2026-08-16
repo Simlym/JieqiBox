@@ -24,6 +24,9 @@ export default {
 
   // Barra de herramientas superior
   toolbar: {
+    fileMenu: 'Archivo',
+    toolsMenu: 'Herramientas',
+    settingsMenu: 'Ajustes',
     newGame: 'Nueva partida',
     copyFen: 'Copiar FEN',
     inputFen: 'Introducir FEN',
@@ -288,6 +291,11 @@ prev.prev - La jugada ante-anterior (soporta anidación infinita)`,
 
   // Barra lateral de análisis
   analysis: {
+    tabEngine: 'Motor',
+    poolRemaining: 'Restantes',
+    poolCaptured: 'Capturadas',
+    tabNotation: 'Notación',
+    tabPosition: 'Posición',
     title: 'Análisis del motor',
     startAnalysis: 'Iniciar análisis',
     stopAnalysis: 'Detener análisis',

@@ -1,5 +1,8 @@
 <template>
   <div class="chessboard-wrapper" :class="{ 'has-chart': showPositionChart }">
+    <!-- Dark piece pool strip for the side on top -->
+    <DarkPiecePoolStrip v-if="showPoolStrips" :side="poolTopSide" />
+
     <div class="chessboard-container">
       <img src="@/assets/xiangqi.png" class="bg" alt="board" />
 
@@ -56,7 +59,7 @@
       <div class="last-move-highlights" v-if="lastMovePositions">
         <div
           class="highlight from"
-          :class="getAnnotationClass(lastMovePositions)"
+          :class="[`mark-${lastMoverSide}`, getAnnotationClass(lastMovePositions)]"
           :style="
             rcStyle(
               displayRow(lastMovePositions.from.row),
@@ -66,7 +69,7 @@
         ></div>
         <div
           class="highlight to"
-          :class="getAnnotationClass(lastMovePositions)"
+          :class="[`mark-${lastMoverSide}`, getAnnotationClass(lastMovePositions)]"
           :style="
             rcStyle(
               displayRow(lastMovePositions.to.row),
@@ -301,6 +304,9 @@
       />
     </div>
 
+    <!-- Dark piece pool strip for the side at the bottom -->
+    <DarkPiecePoolStrip v-if="showPoolStrips" :side="poolBottomSide" />
+
     <!-- Position Chart -->
     <EvaluationChart
       v-if="showPositionChart"
@@ -328,6 +334,8 @@
   import { useInterfaceSettings } from '@/composables/useInterfaceSettings'
   import ClearHistoryConfirmDialog from './ClearHistoryConfirmDialog.vue'
   import EvaluationChart from './EvaluationChart.vue'
+  import DarkPiecePoolStrip from './DarkPiecePoolStrip.vue'
+  import { useHumanVsAiSettings } from '@/composables/useHumanVsAiSettings'
   import { MATE_SCORE_BASE } from '@/utils/constants'
   import { isAndroidPlatform } from '@/utils/platform'
   import { validateJieqiFen } from '@/utils/fenValidator'
@@ -379,6 +387,37 @@
   const showPositionChart = computed(() =>
     props.hidePositionChart ? false : uiShowPositionChart.value
   )
+
+  /* ===== Dark piece pool strips (above / below the board) ===== */
+  const { isHumanVsAiMode } = useHumanVsAiSettings()
+
+  // Top strip belongs to the side sitting at the top of the (possibly flipped) board
+  const poolTopSide = computed<'red' | 'black'>(() =>
+    gs.isBoardFlipped.value ? 'red' : 'black'
+  )
+  const poolBottomSide = computed<'red' | 'black'>(() =>
+    gs.isBoardFlipped.value ? 'black' : 'red'
+  )
+  const showPoolStrips = computed(
+    () => !props.previewMode && !isHumanVsAiMode.value
+  )
+
+  /* ===== Last-move marker color (by the side that made the move) ===== */
+  const lastMoverSide = computed<'red' | 'black'>(() => {
+    const hist = gs.history?.value
+    const idx = gs.currentMoveIndex?.value
+    if (!hist || !idx || idx <= 0) return 'red'
+    // Find the last actual move entry at or before the current index
+    for (let i = idx - 1; i >= 0; i--) {
+      const e = hist[i]
+      if (e?.type === 'move' && e.fen) {
+        // FEN side-to-move is the side AFTER the move, so the mover is the opposite
+        const stm = String(e.fen).split(' ')[1]
+        return stm === 'w' ? 'black' : 'red'
+      }
+    }
+    return 'red'
+  })
 
   /* ===== Injections ===== */
   const gs: any = inject('game-state')
@@ -1360,8 +1399,9 @@
       transition: all 0.2s ease;
     }
     &.selected {
-      transform: translate(-50%, -50%) scale(1.1);
-      filter: drop-shadow(0 0 8px #f00);
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 0 6px rgba(255, 200, 0, 0.95))
+        drop-shadow(0 0 3px rgba(255, 160, 0, 0.9));
     }
     &.inCheck {
       transform: translate(-50%, -50%) scale(1.13);
@@ -1472,8 +1512,21 @@
     position: absolute;
     width: 12%;
     aspect-ratio: 1;
-    border-radius: 50%;
     transform: translate(-50%, -50%);
+    /* Classic xiangqi corner-bracket marker, color set via --mark */
+    --mark: rgba(192, 99, 27, 0.92);
+    --t: 3px;
+    --l: 30%;
+    background:
+      linear-gradient(var(--mark), var(--mark)) 0 0 / var(--l) var(--t),
+      linear-gradient(var(--mark), var(--mark)) 0 0 / var(--t) var(--l),
+      linear-gradient(var(--mark), var(--mark)) 100% 0 / var(--l) var(--t),
+      linear-gradient(var(--mark), var(--mark)) 100% 0 / var(--t) var(--l),
+      linear-gradient(var(--mark), var(--mark)) 0 100% / var(--l) var(--t),
+      linear-gradient(var(--mark), var(--mark)) 0 100% / var(--t) var(--l),
+      linear-gradient(var(--mark), var(--mark)) 100% 100% / var(--l) var(--t),
+      linear-gradient(var(--mark), var(--mark)) 100% 100% / var(--t) var(--l);
+    background-repeat: no-repeat;
     /* Disable text selection and double-click highlighting */
     user-select: none;
     -webkit-user-select: none;
@@ -1483,34 +1536,33 @@
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
-  .highlight.from {
-    border: 3px solid #ff6b6b;
-    background: rgba(255, 107, 107, 0.2);
+
+  /* Bracket color follows the side that made the last move */
+  .highlight.mark-red {
+    --mark: rgba(193, 57, 43, 0.92);
+  }
+  .highlight.mark-black {
+    --mark: rgba(40, 95, 150, 0.9);
   }
 
-  /* Annotation background colors for highlight.from */
-  .highlight.from.annot-brilliant {
-    background: rgba(0, 102, 204, 0.2);
+  /* Annotation colors recolor the brackets */
+  .highlight.annot-brilliant {
+    --mark: #0066cc;
   }
-  .highlight.from.annot-good {
-    background: rgba(0, 188, 212, 0.2);
+  .highlight.annot-good {
+    --mark: #00bcd4;
   }
-  .highlight.from.annot-interesting {
-    background: rgba(139, 195, 74, 0.2);
+  .highlight.annot-interesting {
+    --mark: #8bc34a;
   }
-  .highlight.from.annot-dubious {
-    background: rgba(255, 152, 0, 0.2);
+  .highlight.annot-dubious {
+    --mark: #ff9800;
   }
-  .highlight.from.annot-mistake {
-    background: rgba(255, 87, 34, 0.2);
+  .highlight.annot-mistake {
+    --mark: #ff5722;
   }
-  .highlight.from.annot-blunder {
-    background: rgba(244, 67, 54, 0.2);
-  }
-  .highlight.to {
-    border: 3px solid #4ecdc4;
-    background: rgba(78, 205, 196, 0.2);
-    position: relative;
+  .highlight.annot-blunder {
+    --mark: #f44336;
   }
 
   /* Annotation badge styles */

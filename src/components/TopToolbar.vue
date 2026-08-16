@@ -4,7 +4,6 @@
       <v-btn
         icon="mdi-chess-king"
         size="small"
-        color="teal"
         variant="text"
         @click="setupNewGame"
         :disabled="isMatchRunning"
@@ -13,55 +12,90 @@
       <v-btn
         icon="mdi-pencil-box"
         size="small"
-        color="amber"
         variant="text"
         @click="handleEditPosition"
         :disabled="isMatchRunning"
         :title="$t('toolbar.editPosition')"
       />
-      <v-btn
-        icon="mdi-view-dashboard-outline"
-        size="small"
-        color="lime"
-        variant="text"
-        @click="showInterfaceSettingsDialog = true"
-        :title="$t('toolbar.interfaceSettings')"
-      />
-      <!-- Dark mode toggle button -->
-      <v-btn
-        :icon="darkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-        size="small"
-        :color="darkMode ? 'orange' : 'blue-grey'"
-        variant="text"
-        @click="toggleDarkMode"
-        :title="darkMode ? $t('toolbar.lightMode') : $t('toolbar.darkMode')"
-      />
-      <v-btn
-        icon="mdi-content-save"
-        size="small"
-        color="success"
-        variant="text"
-        @click="handleSaveNotation"
-        :loading="isSaving"
-        :title="$t('toolbar.saveNotation')"
-      />
-      <v-btn
-        icon="mdi-clipboard-text"
-        size="small"
-        color="cyan"
-        variant="text"
-        @click="showNotationTextDialog = true"
-        :disabled="isMatchRunning"
-        :title="$t('toolbar.viewPasteNotation')"
-      />
-      <v-btn
-        icon="mdi-book-open-variant"
-        size="small"
-        color="deep-purple"
-        variant="text"
-        @click="showOpeningBookDialog = true"
-        :title="$t('toolbar.openingBook')"
-      />
+
+      <v-divider vertical class="toolbar-divider" />
+
+      <!-- File menu: save / open / paste notation -->
+      <v-menu location="bottom" :close-on-content-click="true">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-folder-outline"
+            size="small"
+            variant="text"
+            :title="$t('toolbar.fileMenu')"
+          />
+        </template>
+        <v-list density="compact">
+          <v-list-item
+            prepend-icon="mdi-content-save"
+            @click="handleSaveNotation"
+          >
+            <v-list-item-title>{{ $t('toolbar.saveNotation') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-folder-open"
+            :disabled="isMatchRunning"
+            @click="handleOpenNotation"
+          >
+            <v-list-item-title>{{ $t('toolbar.openNotation') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-clipboard-text"
+            :disabled="isMatchRunning"
+            @click="showNotationTextDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.viewPasteNotation') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <!-- Tools menu: opening book / review / variation / drawings -->
+      <v-menu location="bottom" :close-on-content-click="true">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-toolbox-outline"
+            size="small"
+            variant="text"
+            :title="$t('toolbar.toolsMenu')"
+          />
+        </template>
+        <v-list density="compact">
+          <v-list-item
+            prepend-icon="mdi-book-open-variant"
+            @click="showOpeningBookDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.openingBook') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-clipboard-pulse"
+            :disabled="isMatchRunning || isAnalyzing"
+            @click="showReviewDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.reviewAnalysis') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-close-circle"
+            :disabled="!isVariationAvailable"
+            @click="handleVariation"
+          >
+            <v-list-item-title>{{ $t('toolbar.variation') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-ray-start-arrow"
+            :disabled="!isAnalyzeDrawingsAvailable"
+            @click="handleAnalyzeDrawings"
+          >
+            <v-list-item-title>{{ $t('toolbar.analyzeDrawings') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </div>
 
     <div class="toolbar-center">
@@ -69,59 +103,47 @@
     </div>
 
     <div class="toolbar-right">
+      <!-- Settings menu: UCI options / analysis params / interface -->
+      <v-menu location="bottom" :close-on-content-click="true">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-cog-outline"
+            size="small"
+            variant="text"
+            :title="$t('toolbar.settingsMenu')"
+          />
+        </template>
+        <v-list density="compact">
+          <v-list-item
+            prepend-icon="mdi-cog"
+            :disabled="isAnalyzing || engineState.isPondering?.value"
+            @click="showUciOptionsDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.uciSettings') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-timer"
+            @click="showTimeDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.analysisParams') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            prepend-icon="mdi-view-dashboard-outline"
+            @click="showInterfaceSettingsDialog = true"
+          >
+            <v-list-item-title>{{ $t('toolbar.interfaceSettings') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <!-- Dark mode toggle button -->
       <v-btn
-        icon="mdi-cog"
+        :icon="darkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
         size="small"
-        color="purple"
         variant="text"
-        @click="showUciOptionsDialog = true"
-        :disabled="isAnalyzing || engineState.isPondering?.value"
-        :title="$t('toolbar.uciSettings')"
-      />
-      <v-btn
-        icon="mdi-timer"
-        size="small"
-        color="indigo"
-        variant="text"
-        @click="showTimeDialog = true"
-        :title="$t('toolbar.analysisParams')"
-      />
-      <v-btn
-        icon="mdi-clipboard-pulse"
-        size="small"
-        color="deep-orange"
-        variant="text"
-        @click="showReviewDialog = true"
-        :disabled="isMatchRunning || isAnalyzing"
-        :title="$t('toolbar.reviewAnalysis')"
-      />
-      <v-btn
-        icon="mdi-close-circle"
-        size="small"
-        color="deep-purple"
-        variant="text"
-        @click="handleVariation"
-        :disabled="!isVariationAvailable"
-        :title="$t('toolbar.variation')"
-      />
-      <v-btn
-        icon="mdi-ray-start-arrow"
-        size="small"
-        color="green"
-        variant="text"
-        @click="handleAnalyzeDrawings"
-        :disabled="!isAnalyzeDrawingsAvailable"
-        :title="$t('toolbar.analyzeDrawings')"
-      />
-      <v-btn
-        icon="mdi-folder-open"
-        size="small"
-        color="blue-grey"
-        variant="text"
-        @click="handleOpenNotation"
-        :loading="isOpening"
-        :disabled="isMatchRunning"
-        :title="$t('toolbar.openNotation')"
+        @click="toggleDarkMode"
+        :title="darkMode ? $t('toolbar.lightMode') : $t('toolbar.darkMode')"
       />
       <LanguageSelector />
     </div>
@@ -574,6 +596,12 @@
         font-size: 12px;
       }
     }
+  }
+
+  .toolbar-divider {
+    margin: 0 4px;
+    height: 24px;
+    align-self: center;
   }
 
   .toolbar-center {

@@ -24,6 +24,9 @@ export default {
 
   // Obere Werkzeugleiste
   toolbar: {
+    fileMenu: 'Datei',
+    toolsMenu: 'Werkzeuge',
+    settingsMenu: 'Einstellungen',
     newGame: 'Neues Spiel',
     copyFen: 'FEN kopieren',
     inputFen: 'FEN eingeben',
@@ -290,6 +293,11 @@ prev.prev - Vorheriger-vorheriger Zug (unendlich verschachtelbar)`,
 
   // Analyse Seitenleiste
   analysis: {
+    tabEngine: 'Engine',
+    poolRemaining: 'Übrig',
+    poolCaptured: 'Geschlagen',
+    tabNotation: 'Notation',
+    tabPosition: 'Stellung',
     title: 'Engine-Analyse',
     startAnalysis: 'Analyse starten',
     stopAnalysis: 'Analyse stoppen',

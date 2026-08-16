@@ -1,5 +1,23 @@
 <template>
   <div class="sidebar">
+    <!-- Tab bar: group panels into Engine / Notation / Position pages -->
+    <v-tabs
+      v-model="activeTab"
+      density="compact"
+      grow
+      color="primary"
+      class="sidebar-tabs"
+    >
+      <v-tab value="engine" size="small">{{ $t('analysis.tabEngine') }}</v-tab>
+      <v-tab value="notation" size="small">{{
+        $t('analysis.tabNotation')
+      }}</v-tab>
+      <v-tab value="position" size="small">{{
+        $t('analysis.tabPosition')
+      }}</v-tab>
+    </v-tabs>
+
+    <div v-show="activeTab === 'engine'" class="tab-page">
     <!-- Engine Management Section -->
     <div class="engine-management">
       <v-select
@@ -241,6 +259,11 @@
       />
     </div>
 
+    </div>
+
+    <div v-show="activeTab === 'position'" class="tab-page">
+    <CaptureHistoryPanel v-if="isHumanVsAiMode" />
+
     <DraggablePanel v-if="shouldShowLuckIndex" panel-id="luck-index">
       <template #header>
         <h3 class="section-title">{{ $t('analysis.luckIndex') }}</h3>
@@ -275,73 +298,9 @@
       </div>
     </DraggablePanel>
 
-    <CaptureHistoryPanel v-if="isHumanVsAiMode" />
+    </div>
 
-    <DraggablePanel v-if="!isHumanVsAiMode" panel-id="dark-piece-pool">
-      <template #header>
-        <h3 class="section-title">
-          {{ $t('analysis.darkPiecePool') }}
-          <v-chip
-            size="x-small"
-            :color="validationStatusKey === 'normal' ? 'green' : 'red'"
-            variant="flat"
-          >
-            {{ validationStatusMessage }}
-          </v-chip>
-        </h3>
-      </template>
-      <div class="pool-manager">
-        <div
-          v-for="item in unrevealedPiecesForDisplay"
-          :key="item.char"
-          class="pool-item"
-        >
-          <img
-            :src="getPieceImageUrl(item.name)"
-            :alt="item.name"
-            class="pool-piece-img"
-          />
-          <div class="pool-controls">
-            <div class="control-group">
-              <v-btn
-                density="compact"
-                icon="mdi-plus"
-                size="x-small"
-                @click="adjustUnrevealedCount(item.char, 1)"
-                :disabled="item.count >= item.max"
-              />
-              <v-btn
-                density="compact"
-                icon="mdi-minus"
-                size="x-small"
-                @click="adjustUnrevealedCount(item.char, -1)"
-                :disabled="item.count <= 0"
-              />
-            </div>
-            <span class="pool-count"
-              >{{ item.count }}({{ item.capturedCount }})</span
-            >
-            <div class="control-group">
-              <v-btn
-                density="compact"
-                icon="mdi-plus"
-                size="x-small"
-                @click="adjustCapturedUnrevealedCount(item.char, 1)"
-                :disabled="item.count <= 0"
-              />
-              <v-btn
-                density="compact"
-                icon="mdi-minus"
-                size="x-small"
-                @click="adjustCapturedUnrevealedCount(item.char, -1)"
-                :disabled="item.capturedCount <= 0"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </DraggablePanel>
-
+    <div v-show="activeTab === 'engine'" class="tab-page">
     <DraggablePanel
       v-if="!isHumanVsAiMode || showEngineAnalysis"
       panel-id="engine-analysis"
@@ -588,6 +547,9 @@
       />
     </DraggablePanel>
 
+    </div>
+
+    <div v-show="activeTab === 'notation'" class="tab-page">
     <DraggablePanel panel-id="notation">
       <template #header>
         <div class="notation-header">
@@ -959,6 +921,9 @@
       </div>
     </DraggablePanel>
 
+    </div>
+
+    <div v-show="activeTab === 'engine'" class="tab-page">
     <DraggablePanel panel-id="engine-log">
       <template #header>
         <h3>{{ $t('analysis.engineLog') }}</h3>
@@ -987,6 +952,8 @@
       >
         {{ $t('analysis.uciTerminal') }}
       </v-btn>
+    </div>
+
     </div>
 
     <div class="about-section">
@@ -1068,7 +1035,6 @@
     formatEloRating,
     formatErrorMargin,
   } from '@/utils/eloCalculator'
-  import { resolvePieceImage } from '@/utils/pieceImages'
   import PvPreviewDialog from './PvPreviewDialog.vue'
   import { useScoreFormatter } from '@/composables/useScoreFormatter'
   import { marked } from 'marked'
@@ -1095,7 +1061,6 @@
     showLuckIndex,
     showBookMoves,
     useNewFenFormat,
-    pieceStyle,
   } = useInterfaceSettings()
 
   // Get persistent game settings
@@ -1112,12 +1077,6 @@
     replayToMove,
     playMoveFromUci,
     flipMode,
-    unrevealedPieceCounts,
-    capturedUnrevealedPieceCounts,
-    validationStatus,
-    adjustUnrevealedCount,
-    adjustCapturedUnrevealedCount,
-    getPieceNameFromChar,
     sideToMove,
     pendingFlip,
     toggleBoardFlip,
@@ -1190,6 +1149,9 @@
   const showJaiOptionsDialog = ref(false)
   const showEloCalculatorDialog = ref(false)
   const showUciTerminalDialog = ref(false)
+
+  // Sidebar tab state: engine / notation / position
+  const activeTab = ref<'engine' | 'notation' | 'position'>('engine')
 
   // JAI engine state properties - use reactive references from JAI engine
   const isMatchRunning = computed(
@@ -1427,49 +1389,6 @@
   })
 
   /* ---------- UI ---------- */
-  const INITIAL_PIECE_COUNTS: { [k: string]: number } = {
-    R: 2,
-    N: 2,
-    B: 2,
-    A: 2,
-    C: 2,
-    P: 5,
-    K: 1,
-    r: 2,
-    n: 2,
-    b: 2,
-    a: 2,
-    c: 2,
-    p: 5,
-    k: 1,
-  }
-  const unrevealedPiecesForDisplay = computed(() => {
-    const allChars = 'RNBACP'.split('')
-    return allChars.flatMap(char => [
-      {
-        char,
-        name: getPieceNameFromChar(char),
-        count: unrevealedPieceCounts?.value?.[char] || 0,
-        capturedCount: capturedUnrevealedPieceCounts?.value?.[char] || 0,
-        max: INITIAL_PIECE_COUNTS[char],
-      },
-      {
-        char: char.toLowerCase(),
-        name: getPieceNameFromChar(char.toLowerCase()),
-        count: unrevealedPieceCounts?.value?.[char.toLowerCase()] || 0,
-        capturedCount:
-          capturedUnrevealedPieceCounts?.value?.[char.toLowerCase()] || 0,
-        max: INITIAL_PIECE_COUNTS[char.toLowerCase()],
-      },
-    ])
-  })
-  function getPieceImageUrl(pieceName: string): string {
-    const style =
-      pieceStyle?.value === 'internationalized'
-        ? 'internationalized'
-        : 'default'
-    return resolvePieceImage(pieceName, style)
-  }
   function getMoveNumber(historyIndex: number): string {
     const moveCount = history.value
       .slice(0, historyIndex + 1)
@@ -2599,60 +2518,6 @@
     { deep: true }
   )
 
-  const validationStatusKey = computed(() => {
-    if (!validationStatus.value) return 'error'
-    // Support "正常"/normal/Normal
-    return validationStatus.value.includes('正常') ||
-      validationStatus.value.toLowerCase().includes('normal')
-      ? 'normal'
-      : 'error'
-  })
-
-  // Get specific error message
-  const validationStatusMessage = computed(() => {
-    if (!validationStatus.value) return ''
-
-    // If it's normal status, use i18n translation
-    if (
-      validationStatus.value.includes('正常') ||
-      validationStatus.value.toLowerCase().includes('normal')
-    ) {
-      return t('positionEditor.validationStatus.normal')
-    }
-
-    // Parse error information
-    const errorText = validationStatus.value
-
-    // Check if it's dark pieces count mismatch error (new format with side specification)
-    const redDarkPiecesMatch = errorText.match(
-      /错误:\s*红方(\d+)暗子\s*>\s*(\d+)池/
-    )
-    if (redDarkPiecesMatch) {
-      const darkCount = redDarkPiecesMatch[1]
-      const poolCount = redDarkPiecesMatch[2]
-      return t('errors.redDarkPiecesMismatch', { darkCount, poolCount })
-    }
-
-    const blackDarkPiecesMatch = errorText.match(
-      /错误:\s*黑方(\d+)暗子\s*>\s*(\d+)池/
-    )
-    if (blackDarkPiecesMatch) {
-      const darkCount = blackDarkPiecesMatch[1]
-      const poolCount = blackDarkPiecesMatch[2]
-      return t('errors.blackDarkPiecesMismatch', { darkCount, poolCount })
-    }
-
-    // Check if it's piece count exceeded error
-    const pieceCountMatch = errorText.match(/错误:\s*(.+?)\s*总数超限!/)
-    if (pieceCountMatch) {
-      const pieceName = pieceCountMatch[1]
-      return t('errors.pieceCountExceeded', { pieceName })
-    }
-
-    // If none matches, return original error message
-    return errorText
-  })
-
   // UCI info line parser: parse info line into an object
   function parseUciInfoLine(line: string) {
     // Only process lines starting with 'info '
@@ -3437,6 +3302,26 @@
     }
   }
 
+  /* Sidebar tab bar */
+  .sidebar-tabs {
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    margin: -12px -12px 4px -12px;
+    padding: 0 12px;
+
+    @media (max-width: 768px) {
+      margin: -10px -10px 4px -10px;
+      padding: 0 10px;
+    }
+  }
+
+  .tab-page {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
   /* Styles for the engine manager section */
   .engine-management {
     display: flex;
@@ -4102,47 +3987,6 @@
     }
   }
 
-  .pool-manager {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-
-    // Mobile responsive adjustments
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-    }
-  }
-  .pool-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1px 4px;
-    border-radius: 4px;
-    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  }
-  .pool-piece-img {
-    width: 20px;
-    height: 20px;
-  }
-  .pool-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
-    width: 100%;
-  }
-  .control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .pool-count {
-    font-weight: bold;
-    font-size: 0.9rem;
-    width: 40px;
-    text-align: center;
-  }
   .switch-row {
     display: flex;
     gap: 8px;

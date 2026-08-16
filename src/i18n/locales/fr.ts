@@ -24,6 +24,9 @@ export default {
 
   // Barre d'outils supérieure
   toolbar: {
+    fileMenu: 'Fichier',
+    toolsMenu: 'Outils',
+    settingsMenu: 'Paramètres',
     newGame: 'Nouvelle partie',
     copyFen: 'Copier FEN',
     inputFen: 'Saisir FEN',
@@ -289,6 +292,11 @@ prev.prev - L'avant-avant-dernier coup (imbrication infinie)`,
 
   // Barre latérale d'analyse
   analysis: {
+    tabEngine: 'Moteur',
+    poolRemaining: 'Restantes',
+    poolCaptured: 'Capturées',
+    tabNotation: 'Notation',
+    tabPosition: 'Position',
     title: 'Analyse du moteur',
     startAnalysis: "Démarrer l'analyse",
     stopAnalysis: "Arrêter l'analyse",

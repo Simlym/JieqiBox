@@ -24,6 +24,9 @@ export default {
 
   // Bar Alat Atas
   toolbar: {
+    fileMenu: 'Fail',
+    toolsMenu: 'Alatan',
+    settingsMenu: 'Tetapan',
     newGame: 'Permainan Baru',
     copyFen: 'Salin FEN',
     inputFen: 'Masukkan FEN',
@@ -288,6 +291,11 @@ prev.prev - Langkah sebelum sebelumnya (sokongan bersarang tanpa had)`,
 
   // Bar Sisi Analisis
   analysis: {
+    tabEngine: 'Enjin',
+    poolRemaining: 'Baki',
+    poolCaptured: 'Ditangkap',
+    tabNotation: 'Notasi',
+    tabPosition: 'Kedudukan',
     title: 'Analisis Enjin',
     startAnalysis: 'Mula Analisis',
     stopAnalysis: 'Henti Analisis',

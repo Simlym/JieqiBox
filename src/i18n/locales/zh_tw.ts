@@ -24,6 +24,9 @@ export default {
 
   // 頂部工具列
   toolbar: {
+    fileMenu: '檔案',
+    toolsMenu: '工具',
+    settingsMenu: '設定',
     newGame: '新對局',
     copyFen: '複製FEN',
     inputFen: '輸入FEN',
@@ -280,6 +283,11 @@ prev.prev - 上上步（支援無限巢狀）`,
 
   // 分析側邊欄
   analysis: {
+    tabEngine: '引擎',
+    poolRemaining: '剩餘',
+    poolCaptured: '被吃',
+    tabNotation: '棋譜',
+    tabPosition: '局面',
     title: '引擎分析',
     startAnalysis: '開始分析',
     stopAnalysis: '停止分析',

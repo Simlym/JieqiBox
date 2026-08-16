@@ -24,6 +24,9 @@ export default {
 
   // Top toolbar
   toolbar: {
+    fileMenu: 'File',
+    toolsMenu: 'Tools',
+    settingsMenu: 'Settings',
     newGame: 'New Game',
     copyFen: 'Copy FEN',
     inputFen: 'Input FEN',
@@ -287,6 +290,11 @@ prev.prev - Previous-previous move (supports infinite nesting)`,
 
   // Analysis related
   analysis: {
+    tabEngine: 'Engine',
+    poolRemaining: 'Left',
+    poolCaptured: 'Captured',
+    tabNotation: 'Notation',
+    tabPosition: 'Position',
     title: 'Engine Analysis',
     startAnalysis: 'Start Analysis',
     stopAnalysis: 'Stop Analysis',

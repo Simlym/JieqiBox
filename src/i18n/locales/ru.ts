@@ -24,6 +24,9 @@ export default {
 
   // Верхняя панель инструментов
   toolbar: {
+    fileMenu: 'Файл',
+    toolsMenu: 'Инструменты',
+    settingsMenu: 'Настройки',
     newGame: 'Новая игра',
     copyFen: 'Коп. FEN',
     inputFen: 'Ввод FEN',
@@ -286,6 +289,11 @@ prev.prev - пред-предыдущий ход (вложенность)`,
 
   // Боковая панель анализа
   analysis: {
+    tabEngine: 'Движок',
+    poolRemaining: 'Осталось',
+    poolCaptured: 'Съедено',
+    tabNotation: 'Нотация',
+    tabPosition: 'Позиция',
     title: 'Анализ движка',
     startAnalysis: 'Старт',
     stopAnalysis: 'Стоп',

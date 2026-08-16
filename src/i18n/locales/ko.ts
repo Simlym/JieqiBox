@@ -24,6 +24,9 @@ export default {
 
   // 상단 도구 모음
   toolbar: {
+    fileMenu: '파일',
+    toolsMenu: '도구',
+    settingsMenu: '설정',
     newGame: '새 게임',
     copyFen: 'FEN 복사',
     inputFen: 'FEN 입력',
@@ -285,6 +288,11 @@ prev.prev - 전전 수 (무한 중첩 지원)`,
 
   // 분석 사이드바
   analysis: {
+    tabEngine: '엔진',
+    poolRemaining: '남은 것',
+    poolCaptured: '잡힌 것',
+    tabNotation: '기보',
+    tabPosition: '국면',
     title: '엔진 분석',
     startAnalysis: '분석 시작',
     stopAnalysis: '분석 중지',

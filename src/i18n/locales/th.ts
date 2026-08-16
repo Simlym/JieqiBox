@@ -24,6 +24,9 @@ export default {
 
   // แถบเครื่องมือด้านบน
   toolbar: {
+    fileMenu: 'ไฟล์',
+    toolsMenu: 'เครื่องมือ',
+    settingsMenu: 'ตั้งค่า',
     newGame: 'เกมใหม่',
     copyFen: 'คัดลอก FEN',
     inputFen: 'ป้อน FEN',
@@ -285,6 +288,11 @@ prev.prev - ตาเดินก่อนหน้านั้น (ซ้อน
 
   // แถบด้านข้างการวิเคราะห์
   analysis: {
+    tabEngine: 'เอนจิน',
+    poolRemaining: 'เหลือ',
+    poolCaptured: 'ถูกกิน',
+    tabNotation: 'บันทึกเกม',
+    tabPosition: 'ตำแหน่ง',
     title: 'การวิเคราะห์เอนจิน',
     startAnalysis: 'เริ่มวิเคราะห์',
     stopAnalysis: 'หยุดวิเคราะห์',

@@ -24,6 +24,9 @@ export default {
 
   // Thanh công cụ trên cùng
   toolbar: {
+    fileMenu: 'Tệp',
+    toolsMenu: 'Tiện ích',
+    settingsMenu: 'Cài đặt',
     newGame: 'Ván mới',
     copyFen: 'Sao chép FEN',
     inputFen: 'Nhập FEN',
@@ -287,6 +290,11 @@ prev.prev - Nước đi trước-trước (hỗ trợ lồng nhau vô hạn)`,
 
   // Thanh bên phân tích
   analysis: {
+    tabEngine: 'Engine',
+    poolRemaining: 'Còn lại',
+    poolCaptured: 'Bị ăn',
+    tabNotation: 'Kỳ phổ',
+    tabPosition: 'Cục diện',
     title: 'Phân tích động cơ',
     startAnalysis: 'Bắt đầu phân tích',
     stopAnalysis: 'Dừng phân tích',

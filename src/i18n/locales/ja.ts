@@ -24,6 +24,9 @@ export default {
 
   // 上部ツールバー
   toolbar: {
+    fileMenu: 'ファイル',
+    toolsMenu: 'ツール',
+    settingsMenu: '設定',
     newGame: '新しいゲーム',
     copyFen: 'FENをコピー',
     inputFen: 'FENを入力',
@@ -286,6 +289,11 @@ prev.prev - 前々の手（無限ネスト対応）`,
 
   // 解析サイドバー
   analysis: {
+    tabEngine: 'エンジン',
+    poolRemaining: '残り',
+    poolCaptured: '取られた',
+    tabNotation: '棋譜',
+    tabPosition: '局面',
     title: 'エンジン解析',
     startAnalysis: '解析開始',
     stopAnalysis: '解析停止',
